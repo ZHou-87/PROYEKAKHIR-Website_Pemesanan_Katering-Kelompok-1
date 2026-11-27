@@ -18,3 +18,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/owner_admin.php';
+require __DIR__.'/catalog_order.php';
+require __DIR__.'/dashboard_report.php';

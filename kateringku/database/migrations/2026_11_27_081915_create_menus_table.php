@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->enum('category', ['makanan', 'minuman']);
+            $table->text('description')->nullable();
+            $table->decimal('price', 12, 2);
+            $table->integer('min_order')->default(1);
+            $table->string('image')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
