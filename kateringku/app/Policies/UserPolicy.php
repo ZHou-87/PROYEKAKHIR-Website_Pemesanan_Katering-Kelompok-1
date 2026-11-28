@@ -3,54 +3,71 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Determine whether the authenticated user can view the user management list.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $authUser): bool
     {
-        return false;
+        return $authUser->hasRole('owner');
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the authenticated user can view the read-only customer directory.
      */
-    public function view(User $user, User $model): bool
+    public function viewCustomers(User $authUser): bool
     {
-        return false;
+        return $authUser->hasAnyRole(['owner', 'admin']);
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the authenticated user can view a user record.
      */
-    public function create(User $user): bool
+    public function view(User $authUser, User $targetUser): bool
     {
-        return false;
+        return $authUser->hasRole('owner') || $authUser->id === $targetUser->id;
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determine whether the authenticated user can create new user accounts.
      */
-    public function update(User $user, User $model): bool
+    public function create(User $authUser): bool
     {
-        return false;
+        return $authUser->hasRole('owner');
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the authenticated user can update the target user's role.
+     * Owner cannot change their own role.
      */
-    public function delete(User $user, User $model): bool
+    public function update(User $authUser, User $targetUser): bool
     {
-        return false;
+        return $authUser->hasRole('owner') && $authUser->id !== $targetUser->id;
+    }
+
+    /**
+     * Alias for role update authorization.
+     */
+    public function updateRole(User $authUser, User $targetUser): bool
+    {
+        return $this->update($authUser, $targetUser);
+    }
+
+    /**
+     * Determine whether the authenticated user can delete the target user.
+     * Owner cannot delete their own account.
+     */
+    public function delete(User $authUser, User $targetUser): bool
+    {
+        return $authUser->hasRole('owner') && $authUser->id !== $targetUser->id;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, User $model): bool
+    public function restore(User $authUser, User $targetUser): bool
     {
         return false;
     }
@@ -58,7 +75,7 @@ class UserPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, User $model): bool
+    public function forceDelete(User $authUser, User $targetUser): bool
     {
         return false;
     }
